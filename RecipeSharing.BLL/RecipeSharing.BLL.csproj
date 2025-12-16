@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\RecipeSharing.DAL\RecipeSharing.DAL.csproj" />
+  </ItemGroup>
+
 </Project>
