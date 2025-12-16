@@ -6,8 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 
 builder.Services.AddDbContext<RecipeSharingDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("RecipeContext") 
-    ?? throw new InvalidOperationException("Connection string 'RecipeContext' not found.")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("RecipeSharingDbConnection")));
 
 var app = builder.Build();
 
