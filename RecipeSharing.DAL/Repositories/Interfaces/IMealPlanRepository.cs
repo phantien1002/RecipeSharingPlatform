@@ -7,10 +7,9 @@ using System.Threading.Tasks;
 
 namespace RecipeSharing.DAL.Repositories.Interfaces
 {
-    public interface IRecipeRepository
+    public interface IMealPlanRepository
     {
-        Recipe? GetRecipeWithIngredients(int recipeId);
-
-        List<Recipe> GetAll();
+        void Add(MealPlan mealPlan);
+        List<MealPlan> GetByUserAndDate(int userId, DateOnly date);
     }
 }

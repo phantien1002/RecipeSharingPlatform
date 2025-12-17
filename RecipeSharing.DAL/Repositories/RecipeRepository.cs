@@ -24,5 +24,10 @@ namespace RecipeSharing.DAL.Repositories
                 .ThenInclude(ri => ri.Ingredient)
                 .FirstOrDefault(r => r.RecipeId == recipeId);
         }
+
+        public List<Recipe> GetAll()
+        {
+            return _context.Recipes.ToList();
+        }
     }
 }

@@ -14,6 +14,7 @@ builder.Services.AddDbContext<RecipeSharingDbContext>(options =>
 
 builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
+builder.Services.AddScoped<IMealPlanRepository, MealPlanRepository>();
 
 var app = builder.Build();
 
