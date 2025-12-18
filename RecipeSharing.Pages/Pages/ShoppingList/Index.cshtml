@@ -1,0 +1,286 @@
+﻿@page
+@model RecipeSharing.Pages.Pages.ShoppingList.IndexModel
+@using System.Globalization
+@{
+    ViewData["Title"] = "Shopping List";
+}
+
+<link rel="stylesheet" href="~/css/shoppinglist.css" />
+
+<div class="sl-wrap">
+
+    <!-- ===== Header ===== -->
+    <div class="sl-hero">
+        <div class="sl-title">Shopping List</div>
+        <div class="sl-sub">
+            Generate từ MealPlans → tổng hợp Ingredient → tick đã mua & update số lượng.
+        </div>
+    </div>
+
+    <!-- ===== Generate Card ===== -->
+    <div class="sl-card">
+        <div class="sl-card-hd">
+            <h5>Generate Shopping List</h5>
+
+            <div class="sl-badges">
+                @if (Model.ListVm != null)
+                {
+                    <span class="sl-badge">
+                        <span class="sl-dot"></span>
+                        List #@Model.ListVm.ShoppingListId
+                    </span>
+                    <span class="sl-badge gray">
+                        Created @Model.ListVm.CreatedAt?.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                    </span>
+                }
+                else
+                {
+                    <span class="sl-badge gray">
+                        <span class="sl-dot" style="background:#94a3b8"></span>
+                        No list generated
+                    </span>
+                }
+            </div>
+        </div>
+
+        <div class="sl-card-bd">
+            <form method="post" asp-page-handler="Generate">
+                @Html.AntiForgeryToken()
+
+                <div class="sl-form">
+                    <div>
+                        <div class="sl-label">User ID</div>
+                        <input class="sl-input" asp-for="UserId" type="number" min="1" />
+                    </div>
+
+                    <div>
+                        <div class="sl-label">From</div>
+                        <input class="sl-input" asp-for="From" type="date" />
+                    </div>
+
+                    <div>
+                        <div class="sl-label">To</div>
+                        <input class="sl-input" asp-for="To" type="date" />
+                    </div>
+
+                    <button class="sl-btn" type="submit">Generate</button>
+                </div>
+            </form>
+
+            @if (Model.ListVm == null)
+            {
+                <div class="sl-empty">
+                    Chưa có list. Hãy chọn khoảng thời gian rồi bấm <b>Generate</b>.
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- ===== Summary + Filter ===== -->
+    @if (Model.ListVm != null)
+    {
+        var total = Model.ListVm.Items.Count;
+        var done = Model.ListVm.Items.Count(x => x.IsChecked);
+        var percent = total == 0 ? 0 : (int)Math.Round(done * 100.0 / total);
+
+        <div class="sl-card">
+            <div class="sl-card-hd">
+                <h5>Progress</h5>
+                <span class="sl-badge gray">@percent%</span>
+            </div>
+
+            <div class="sl-card-bd">
+                <div class="sl-kpi-row">
+                    <div class="sl-pill">
+                        Done: <span id="slDone">@done</span>/<span id="slTotal">@total</span>
+                    </div>
+
+                    <div class="sl-progress">
+                        <div id="slProgress" style="width:@percent%"></div>
+                    </div>
+                </div>
+
+                <div class="sl-toolbar">
+                    <select id="slFilter" class="sl-select" style="max-width:220px;">
+                        <option value="all">All items</option>
+                        <option value="todo">Not purchased</option>
+                        <option value="done">Purchased</option>
+                    </select>
+
+                    <input id="slSearch"
+                           class="sl-input"
+                           style="max-width:260px;"
+                           placeholder="Search ingredient..." />
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- ===== Items Table ===== -->
+    @if (Model.ListVm != null)
+    {
+        if (Model.ListVm.Items.Count == 0)
+        {
+            <div class="sl-empty">
+                Không có MealPlans trong khoảng thời gian này.
+            </div>
+        }
+        else
+        {
+            <div class="sl-card">
+                <div class="sl-card-hd">
+                    <h5>Ingredients</h5>
+                    <span class="sl-badge gray">Tick để đánh dấu đã mua</span>
+                </div>
+
+                <div class="sl-card-bd">
+                    <table class="sl-table">
+                        <thead>
+                            <tr>
+                                <th style="width:90px;">Done</th>
+                                <th>Ingredient</th>
+                                <th style="width:220px;">Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody id="slBody">
+                            @foreach (var it in Model.ListVm.Items)
+                            {
+                                var rowDone = it.IsChecked ? "1" : "0";
+                                <tr data-done="@rowDone"
+                                    data-name="@it.IngredientName.ToLowerInvariant()">
+
+                                    <td>
+                                        <input class="form-check-input sl-check"
+                                               type="checkbox"
+                                               @(it.IsChecked ? "checked" : "")
+                                               onchange="toggleChecked(@it.ItemId, this.checked, this)" />
+                                    </td>
+
+                                    <td>
+                                        <div class="@(it.IsChecked ? "sl-done" : "")">
+                                            @it.IngredientName
+                                        </div>
+                                        <div class="sl-muted">
+                                            Ingredient ID: @it.IngredientId
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <input class="sl-input sl-qty"
+                                               type="text"
+                                               value="@it.Quantity.ToString(CultureInfo.InvariantCulture)"
+                                               onblur="updateQty(@it.ItemId, this.value, this)" />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    }
+
+</div>
+
+<div id="slToast" class="sl-toast">Saved ✅</div>
+
+@section Scripts {
+    <script>
+        function token() {
+            const el = document.querySelector('input[name="__RequestVerificationToken"]');
+            return el ? el.value : '';
+        }
+
+        let toastTimer = null;
+        function toast(msg = "Saved ✅") {
+            const t = document.getElementById("slToast");
+            t.textContent = msg;
+            t.classList.add("show");
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => t.classList.remove("show"), 1200);
+        }
+
+        function recalcProgress() {
+            const rows = Array.from(document.querySelectorAll('#slBody tr'));
+            const total = rows.length;
+            const done = rows.filter(r => r.getAttribute('data-done') === '1').length;
+
+            const percent = total === 0 ? 0 : Math.round(done * 100 / total);
+            const bar = document.getElementById('slProgress');
+            const doneEl = document.getElementById('slDone');
+            const totalEl = document.getElementById('slTotal');
+            if (bar) bar.style.width = percent + "%";
+            if (doneEl) doneEl.textContent = done;
+            if (totalEl) totalEl.textContent = total;
+        }
+
+        async function toggleChecked(itemId, isChecked, checkboxEl) {
+            await fetch('?handler=ToggleChecked&UserId=@Model.UserId', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token()
+                },
+                body: JSON.stringify({ itemId, isChecked })
+            });
+
+            // update UI
+            const row = checkboxEl.closest('tr');
+            row.setAttribute('data-done', isChecked ? '1' : '0');
+            const nameDiv = row.querySelector('td:nth-child(2) > div:first-child');
+            if (nameDiv) nameDiv.classList.toggle('sl-done', isChecked);
+
+            toast(isChecked ? "Marked as purchased ✅" : "Marked as not purchased ↩️");
+            applyFilterSearch();
+            recalcProgress();
+        }
+
+        async function updateQty(itemId, quantity, inputEl) {
+            const normalized = String(quantity).trim().replace(',', '.');
+            const q = parseFloat(normalized);
+
+            if (Number.isNaN(q) || q < 0) {
+                inputEl.value = inputEl.value; // keep
+                toast("Invalid quantity ❌");
+                return;
+            }
+
+            await fetch('?handler=UpdateQuantity&UserId=@Model.UserId', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token()
+                },
+                body: JSON.stringify({ itemId, quantity: q })
+            });
+
+            // normalize display
+            inputEl.value = q.toString();
+            toast("Quantity saved ✅");
+        }
+
+        function applyFilterSearch() {
+            const filter = document.getElementById('slFilter')?.value ?? 'all';
+            const q = (document.getElementById('slSearch')?.value ?? '').toLowerCase().trim();
+
+            const rows = Array.from(document.querySelectorAll('#slBody tr'));
+            rows.forEach(r => {
+                const done = r.getAttribute('data-done') === '1';
+                const name = r.getAttribute('data-name') || '';
+                const okFilter =
+                    filter === 'all' ||
+                    (filter === 'todo' && !done) ||
+                    (filter === 'done' && done);
+                const okSearch = !q || name.includes(q);
+
+                r.style.display = (okFilter && okSearch) ? '' : 'none';
+            });
+        }
+
+        document.getElementById('slFilter')?.addEventListener('change', applyFilterSearch);
+        document.getElementById('slSearch')?.addEventListener('input', applyFilterSearch);
+
+        // init
+        recalcProgress();
+    </script>
+}
