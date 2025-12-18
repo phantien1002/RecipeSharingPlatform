@@ -33,5 +33,7 @@ public partial class Recipe
 
     public virtual User User { get; set; } = null!;
 
-    public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
+    //public virtual ICollection<Category> Categories { get; set; } = new List<Category>();
+
+    public ICollection<RecipeCategory> RecipeCategories { get; set; } = new List<RecipeCategory>();
 }
