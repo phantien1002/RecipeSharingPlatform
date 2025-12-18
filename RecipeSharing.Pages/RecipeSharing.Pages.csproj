@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\css\shoppinglist.css" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\css\shoppinglist.css" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\RecipeSharing.BLL\RecipeSharing.BLL.csproj" />
     <ProjectReference Include="..\RecipeSharing.DAL\RecipeSharing.DAL.csproj" />
   </ItemGroup>

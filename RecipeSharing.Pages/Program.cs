@@ -13,6 +13,8 @@ using RecipeSharing.DAL.Repositories.Interfaces;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
+builder.Services.AddScoped<IShoppingListService, ShoppingListService>();
+
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
 builder.Services.AddScoped<IAuthService, AuthService>();
