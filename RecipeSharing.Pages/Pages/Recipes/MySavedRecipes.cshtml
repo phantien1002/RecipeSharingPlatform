@@ -1,0 +1,33 @@
+﻿@page
+@model global::RecipeSharing.Pages.Pages.Recipes.MySavedRecipesModel
+@{
+    ViewData["Title"] = "Công thức đã lưu";
+}
+
+<div class="container mt-4">
+    <h2 class="fw-bold text-primary mb-4">Món ăn bạn đã lưu</h2>
+    <div class="row">
+        @if (Model.SavedRecipes != null && Model.SavedRecipes.Any())
+        {
+            @foreach (var item in Model.SavedRecipes)
+            {
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <img src="@item.ImageUrl" class="card-img-top" style="height:150px; object-fit:cover;">
+                        <div class="card-body">
+                            <h5 class="card-title">@item.Title</h5>
+                            <a asp-page="./Detail" asp-route-id="@item.RecipeId" class="btn btn-sm btn-primary">Xem lại</a>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center">
+                <p class="text-muted">Bạn chưa lưu công thức nào.</p>
+                <a asp-page="./Index" class="btn btn-outline-primary">Quay lại trang chủ</a>
+            </div>
+        }
+    </div>
+</div>

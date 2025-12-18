@@ -9,7 +9,7 @@ namespace RecipeSharing.BLL.Interfaces
 {
     public interface ISavedRecipeService
     {
-        Task ToggleSaveRecipeAsync(int userId, int recipeId);
+        Task<string> ToggleSaveRecipeAsync(int userId, int recipeId);
         Task<bool> IsRecipeSavedAsync(int userId, int recipeId);
         Task<List<int>> GetSavedRecipeIdsAsync(int userId);
         Task<IEnumerable<Recipe>> GetSavedRecipesByUserIdAsync(int userId);

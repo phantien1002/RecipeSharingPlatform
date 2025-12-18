@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using RecipeSharing.BLL.Interfaces;
 using RecipeSharing.DAL.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace RecipeSharing.Pages.Pages.Recipes
 {
@@ -19,6 +17,7 @@ namespace RecipeSharing.Pages.Pages.Recipes
         }
 
         public IEnumerable<Recipe> Recipes { get; set; } = new List<Recipe>();
+
         public List<int> SavedRecipeIds { get; set; } = new List<int>();
 
         public async Task OnGetAsync()
@@ -26,24 +25,13 @@ namespace RecipeSharing.Pages.Pages.Recipes
             Recipes = await _recipeService.GetAllAsync();
 
             var userIdStr = User.FindFirst("UserId")?.Value;
+
             if (!string.IsNullOrEmpty(userIdStr))
             {
-                SavedRecipeIds = await _savedService.GetSavedRecipeIdsAsync(int.Parse(userIdStr));
+                int userId = int.Parse(userIdStr);
+                var savedRecipes = await _savedService.GetSavedRecipesByUserIdAsync(userId);
+                SavedRecipeIds = savedRecipes.Select(r => r.RecipeId).ToList();
             }
-        }
-
-        public async Task<IActionResult> OnPostSaveAsync(int recipeId)
-        {
-            var userIdStr = User.FindFirst("UserId")?.Value;
-
-            // Kiểm tra log xem UserId có lấy được không
-            if (string.IsNullOrEmpty(userIdStr)) return RedirectToPage("/Auth/Login");
-
-            int userId = int.Parse(userIdStr);
-            await _savedService.ToggleSaveRecipeAsync(userId, recipeId);
-
-            // Dùng đường dẫn đầy đủ tính từ thư mục Pages
-            return RedirectToPage("/Pages/Recipes/MySavedRecipes");
         }
     }
 }
