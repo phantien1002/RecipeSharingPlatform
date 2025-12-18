@@ -65,17 +65,19 @@
                                 <i class="fas fa-eye me-1"></i> Chi tiết
                             </a>
 
-                            <form method="post" asp-page="./SaveAction" asp-route-recipeId="@item.RecipeId" asp-route-returnUrl="@Request.Path">
-                                @if (Model.SavedRecipeIds.Contains(item.RecipeId))
+                            <form method="post" asp-page="/Recipes/SaveAction" asp-route-recipeId="@item.RecipeId" asp-route-returnUrl="@Request.Path">
+                                @Html.AntiForgeryToken()
+
+                                @if (Model.SavedRecipeIds != null && Model.SavedRecipeIds.Contains(item.RecipeId))
                                 {
-                                    <button type="submit" class="btn btn-warning shadow-sm">
-                                        <i class="fas fa-bookmark"></i> Đã lưu
+                                    <button type="submit" id="btn-save-@item.RecipeId" class="btn btn-warning shadow-sm w-100">
+                                        <i class="fas fa-bookmark"></i> <span id="text-@item.RecipeId">Đã lưu</span>
                                     </button>
                                 }
                                 else
                                 {
-                                    <button type="submit" class="btn btn-outline-warning shadow-sm">
-                                        <i class="far fa-bookmark"></i> Lưu
+                                    <button type="submit" id="btn-save-@item.RecipeId" class="btn btn-outline-warning shadow-sm w-100">
+                                        <i class="far fa-bookmark"></i> <span id="text-@item.RecipeId">Lưu</span>
                                     </button>
                                 }
                             </form>
@@ -100,3 +102,50 @@
         box-shadow: 0 8px 15px rgba(0,0,0,0.1) !important;
     }
 </style>
+@section Scripts {
+    @* 1. Nhúng thư viện SignalR *@
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+
+    <script>
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/recipeHub")
+            .withAutomaticReconnect()
+            .build();
+
+        connection.on("UpdateSaveStatus", function (recipeId, recipeName) {
+            console.log("Món ăn thay đổi: " + recipeName);
+
+            const toast = document.createElement("div");
+
+            toast.style.position = 'fixed';
+            toast.style.top = '20px';
+            toast.style.right = '20px';
+            toast.style.backgroundColor = '#28a745';
+            toast.style.color = 'white';
+            toast.style.padding = '15px 25px';
+            toast.style.borderRadius = '8px';
+            toast.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+            toast.style.zIndex = '9999';
+            toast.style.transition = 'all 0.5s ease';
+
+            toast.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>+1 thành viên đã lưu công thức <strong>${recipeName}</strong>!</span>
+                </div>
+            `;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-20px)';
+                setTimeout(() => toast.remove(), 500);
+            }, 4000);
+        });
+
+        connection.start()
+            .then(() => console.log("SignalR: Sẵn sàng nhận thông báo tên món ăn!"))
+            .catch(err => console.error("Lỗi kết nối SignalR: ", err));
+    </script>
+}

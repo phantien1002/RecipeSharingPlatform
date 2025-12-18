@@ -20,25 +20,39 @@ namespace RecipeSharing.BLL.Services
             _savedRepo = savedRepo;
         }
 
-        public async Task ToggleSaveRecipeAsync(int userId, int recipeId)
+
+        public async Task<string> ToggleSaveRecipeAsync(int userId, int recipeId)
         {
             var existing = await _savedRepo.Query()
+                .Include(sr => sr.Recipe)
                 .FirstOrDefaultAsync(sr => sr.UserId == userId && sr.RecipeId == recipeId);
+
+            string recipeName = "";
 
             if (existing != null)
             {
+                recipeName = existing.Recipe?.Title ?? "Món ăn";
                 _savedRepo.Delete(existing);
             }
             else
             {
+
                 await _savedRepo.AddAsync(new SavedRecipe
                 {
                     UserId = userId,
                     RecipeId = recipeId,
                     SavedAt = DateTime.Now
                 });
+
+                var recipe = await _savedRepo.Query()
+                    .Where(x => x.RecipeId == recipeId)
+                    .Select(x => x.Recipe.Title)
+                    .FirstOrDefaultAsync();
+                recipeName = recipe ?? "Món ăn";
             }
+
             await _savedRepo.SaveChangesAsync();
+            return recipeName;
         }
 
         public async Task<bool> IsRecipeSavedAsync(int userId, int recipeId)

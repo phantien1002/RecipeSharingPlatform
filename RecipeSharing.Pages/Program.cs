@@ -4,10 +4,12 @@ using RecipeSharing.BLL.Interfaces;
 using RecipeSharing.BLL.Services;
 using RecipeSharing.DAL.Models;
 using RecipeSharing.DAL.Repositories;
+using RecipeSharing.Pages.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRazorPages();
+builder.Services.AddSignalR();
 
 builder.Services.AddScoped(typeof(IRepository<>), typeof(RepositoryBase<>));
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -49,5 +51,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
+
+app.MapHub<RecipeHub>("/recipeHub");
 
 app.Run();
