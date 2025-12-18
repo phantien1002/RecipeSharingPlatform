@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\RecipeSharing.BLL\RecipeSharing.BLL.csproj" />
+    <ProjectReference Include="..\RecipeSharing.DAL\RecipeSharing.DAL.csproj" />
   </ItemGroup>
 
 </Project>
