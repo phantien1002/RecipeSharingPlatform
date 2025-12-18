@@ -2,9 +2,6 @@
 using RecipeSharing.BLL.Interfaces;
 using RecipeSharing.DAL.Models;
 using RecipeSharing.DAL.Repositories;
-﻿using RecipeSharing.BLL.Services.Interfaces;
-using RecipeSharing.DAL.Models;
-using RecipeSharing.DAL.Repositories.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,11 +41,14 @@ namespace RecipeSharing.BLL.Services
                 Difficulty = dto.Difficulty
             };
 
+            await _recipeRepo.AddAsync(recipe);
+            await _recipeRepo.SaveChangesAsync();
+
             foreach (var ing in dto.Ingredients)
             {
                 await _recipeIngredientRepo.AddAsync(new RecipeIngredient
                 {
-                    Recipe = recipe,
+                    RecipeId = recipe.RecipeId,
                     IngredientId = ing.IngredientId,
                     Quantity = ing.Quantity
                 });
@@ -58,12 +58,12 @@ namespace RecipeSharing.BLL.Services
             {
                 await _recipeCategoryRepo.AddAsync(new RecipeCategory
                 {
-                    Recipe = recipe,
+                    RecipeId = recipe.RecipeId,
                     CategoryId = catId
                 });
             }
 
-            await _recipeRepo.SaveChangesAsync();
+            await _recipeIngredientRepo.SaveChangesAsync();
         }
 
         public async Task<Recipe?> GetDetailAsync(int id)
@@ -77,32 +77,5 @@ namespace RecipeSharing.BLL.Services
                 .FirstOrDefaultAsync(r => r.RecipeId == id);
         }
 
-        public async Task<IEnumerable<Recipe>> GetAllAsync()
-        {
-            return await _recipeRepo.Query()
-                .Include(r => r.RecipeCategories)
-                    .ThenInclude(rc => rc.Category)
-                .Include(r => r.User)
-                .OrderByDescending(r => r.RecipeId)
-                .ToListAsync();
-        }
-
-        private readonly IRecipeRepository _recipeRepository;
-        public RecipeService(IRecipeRepository recipeRepository)
-        {
-            _recipeRepository = recipeRepository;
-        }
-
-        public Recipe? GetRecipe(int recipeId)
-        {
-            return _recipeRepository.GetRecipeWithIngredients(recipeId);
-        }
-
-        public decimal CalculateQuantity(decimal baseQuantity, int baseServings, int selectedServings)
-        {
-            if (baseServings <= 0) return baseQuantity;
-
-            return (baseQuantity * selectedServings) / baseServings;
-        }
     }
 }

@@ -12,11 +12,11 @@
         </div>
 
         <div class="d-flex gap-2">
-            <a asp-page="/Recipes/MySavedRecipes" class="btn btn-outline-danger shadow-sm">
+            <a asp-page="Recipes/MySavedRecipes" class="btn btn-outline-danger shadow-sm">
                 <i class="fas fa-heart me-1"></i> Mục đã lưu
             </a>
 
-            <a asp-page="/Recipes/Create" class="btn btn-success shadow-sm">
+            <a asp-page="Recipes/Create" class="btn btn-success shadow-sm">
                 <i class="fas fa-plus-circle me-1"></i> Tạo công thức
             </a>
 
@@ -61,15 +61,15 @@
                         </div>
 
                         <div class="card-footer bg-white border-0 d-flex gap-2 pb-3">
-                            <a asp-page="/Recipes/Detail" asp-route-id="@item.RecipeId" class="btn btn-primary flex-grow-1">
+                            <a asp-page="Recipes/Detail" asp-route-id="@item.RecipeId" class="btn btn-primary flex-grow-1">
                                 <i class="fas fa-eye me-1"></i> Chi tiết
                             </a>
 
-                            <form method="post" asp-page="./SaveAction" asp-route-recipeId="@item.RecipeId" asp-route-returnUrl="@Request.Path">
-                                @if (Model.SavedRecipeIds.Contains(item.RecipeId))
+                            <form method="post" asp-page-handler="Save" asp-route-recipeId="@item.RecipeId">
+                                @if (Model.SavedRecipeIds != null && Model.SavedRecipeIds.Contains(item.RecipeId))
                                 {
                                     <button type="submit" class="btn btn-warning shadow-sm">
-                                        <i class="fas fa-bookmark"></i> Đã lưu
+                                        <i class="fas fa-bookmark text-white"></i> <span class="text-white">Đã lưu</span>
                                     </button>
                                 }
                                 else
