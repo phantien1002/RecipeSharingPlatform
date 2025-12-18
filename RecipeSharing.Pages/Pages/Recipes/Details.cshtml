@@ -1,0 +1,44 @@
+﻿@page "{id:int}"
+@model DetailsModel
+
+<h2>@Model.Recipe.Title</h2>
+
+<p>@Model.Recipe.Description</p>
+
+<hr />
+
+<form method="get">
+    <input type="hidden" name="id" value="@Model.Recipe.RecipeId" />
+
+    <label><b>Number of servings:</b></label>
+    <input type="number"
+           name="servings"
+           min="1"
+           value="@Model.Servings"
+           onchange="this.form.submit()" />
+</form>
+
+<hr />
+
+<h3>Ingredients</h3>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Name</th>
+        <th>Quantity</th>
+        <th>Unit</th>
+    </tr>
+
+    @foreach (var item in Model.Recipe.RecipeIngredients)
+    {
+        <tr>
+            <td>@item.Ingredient.Name</td>
+            <td>@Model.GetCalculatedQuantity(item.Quantity)</td>
+            <td>@item.Ingredient.Unit</td>
+        </tr>
+    }
+</table>
+
+<p>
+    <i>Base serving size: @Model.Recipe.ServingSize</i>
+</p>

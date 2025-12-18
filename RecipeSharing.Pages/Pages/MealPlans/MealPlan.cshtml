@@ -1,0 +1,65 @@
+﻿@page
+@model RecipeSharing.Pages.Pages.MealPlans.MealPlanModel
+
+@{
+    ViewData["Title"] = "Create Meal Plan";
+}
+
+<h2>Create Meal Plan</h2>
+
+<form method="post">
+    <!-- Plan Date -->
+    <div class="form-group">
+        <label asp-for="PlanDate">Date</label>
+        <input asp-for="PlanDate"
+               type="date"
+               class="form-control" />
+        <span asp-validation-for="PlanDate" class="text-danger"></span>
+    </div>
+
+    <br />
+
+    <!-- Meal Type -->
+    <div class="form-group">
+        <label asp-for="MealType">Meal Type</label>
+        <select asp-for="MealType" class="form-control">
+            <option value="">-- Select Meal --</option>
+            <option value="Breakfast">Breakfast</option>
+            <option value="Lunch">Lunch</option>
+            <option value="Dinner">Dinner</option>
+        </select>
+        <span asp-validation-for="MealType" class="text-danger"></span>
+    </div>
+
+    <br />
+
+    <!-- Recipe -->
+    <div class="form-group">
+        <label asp-for="RecipeId">Recipe</label>
+        <select asp-for="RecipeId" class="form-control">
+            <option value="">-- Select Recipe --</option>
+            @foreach (var recipe in Model.Recipes)
+            {
+                <option value="@recipe.RecipeId">
+                    @recipe.Title
+                </option>
+            }
+        </select>
+        <span asp-validation-for="RecipeId" class="text-danger"></span>
+    </div>
+
+    <br />
+
+    <!-- Submit -->
+    <button type="submit" class="btn btn-primary">
+        Save Meal Plan
+    </button>
+
+    <a asp-page="Index" class="btn btn-secondary">
+        Cancel
+    </a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

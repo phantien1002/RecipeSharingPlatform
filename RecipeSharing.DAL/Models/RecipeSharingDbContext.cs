@@ -22,6 +22,7 @@ public partial class RecipeSharingDbContext : DbContext
     public virtual DbSet<MealPlan> MealPlans { get; set; }
 
     public virtual DbSet<Recipe> Recipes { get; set; }
+    public DbSet<RecipeCategory> RecipeCategories { get; set; }
 
     public virtual DbSet<RecipeIngredient> RecipeIngredients { get; set; }
 
@@ -33,13 +34,20 @@ public partial class RecipeSharingDbContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.UseSqlServer("Server=(local);Uid=sa;Pwd=12345;Database=RecipeSharingDB;");
-    }
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<RecipeCategory>()
+        .HasKey(rc => new { rc.RecipeId, rc.CategoryId });
+
+        modelBuilder.Entity<RecipeCategory>()
+            .HasOne(rc => rc.Recipe)
+            .WithMany(r => r.RecipeCategories)
+            .HasForeignKey(rc => rc.RecipeId);
+
+        modelBuilder.Entity<RecipeCategory>()
+            .HasOne(rc => rc.Category)
+            .WithMany(c => c.RecipeCategories)
+            .HasForeignKey(rc => rc.CategoryId);
         modelBuilder.Entity<Category>(entity =>
         {
             entity.HasKey(e => e.CategoryId).HasName("PK__Categori__19093A0BBD597078");
@@ -98,22 +106,22 @@ public partial class RecipeSharingDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Recipes__UserId__3D5E1FD2");
 
-            entity.HasMany(d => d.Categories).WithMany(p => p.Recipes)
-                .UsingEntity<Dictionary<string, object>>(
-                    "RecipeCategory",
-                    r => r.HasOne<Category>().WithMany()
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__RecipeCat__Categ__59FA5E80"),
-                    l => l.HasOne<Recipe>().WithMany()
-                        .HasForeignKey("RecipeId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK__RecipeCat__Recip__59063A47"),
-                    j =>
-                    {
-                        j.HasKey("RecipeId", "CategoryId").HasName("PK__RecipeCa__5C491B10960ADF31");
-                        j.ToTable("RecipeCategories");
-                    });
+            //entity.HasMany(d => d.Categories).WithMany(p => p.Recipes)
+            //    .UsingEntity<Dictionary<string, object>>(
+            //        "RecipeCategory",
+            //        r => r.HasOne<Category>().WithMany()
+            //            .HasForeignKey("CategoryId")
+            //            .OnDelete(DeleteBehavior.ClientSetNull)
+            //            .HasConstraintName("FK__RecipeCat__Categ__59FA5E80"),
+            //        l => l.HasOne<Recipe>().WithMany()
+            //            .HasForeignKey("RecipeId")
+            //            .OnDelete(DeleteBehavior.ClientSetNull)
+            //            .HasConstraintName("FK__RecipeCat__Recip__59063A47"),
+            //        j =>
+            //        {
+            //            j.HasKey("RecipeId", "CategoryId").HasName("PK__RecipeCa__5C491B10960ADF31");
+            //            j.ToTable("RecipeCategories");
+            //        });
         });
 
         modelBuilder.Entity<RecipeIngredient>(entity =>

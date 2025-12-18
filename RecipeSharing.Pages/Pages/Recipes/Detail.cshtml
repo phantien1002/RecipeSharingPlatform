@@ -1,0 +1,36 @@
+﻿@page "{id:int}"
+@model global::RecipeSharing.Pages.Pages.Recipes.DetailModel
+@{
+    if (Model.Recipe == null)
+    {
+        <div class="alert alert-danger">Unavailable/Delete Recipe</div>
+        return;
+    }
+}
+
+<h2>@Model.Recipe.Title</h2>
+
+<p>@Model.Recipe.Description</p>
+
+@if (!string.IsNullOrEmpty(Model.Recipe.ImageUrl))
+{
+    <img src="@Model.Recipe.ImageUrl" style="max-width:400px" />
+}
+
+<h4>Ingredients</h4>
+<ul>
+@foreach (var item in Model.Recipe.RecipeIngredients)
+{
+    <li>
+        @item.Ingredient.Name – @item.Quantity
+    </li>
+}
+</ul>
+
+<h4>Categories</h4>
+<ul>
+@foreach (var c in Model.Recipe.RecipeCategories)
+{
+    <li>@c.Category.Name</li>
+}
+</ul>

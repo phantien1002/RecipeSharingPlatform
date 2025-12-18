@@ -1,0 +1,94 @@
+﻿@page
+@model global::RecipeSharing.Pages.Pages.Recipes.CreateModel
+@{
+}
+
+<h2>Create New Recipe</h2>
+
+<form method="post">
+    <fieldset>
+        <legend>Basic Information</legend>
+
+        <div>
+            <label>Title *</label><br />
+            <input asp-for="Recipe.Title" required />
+        </div>
+
+        <div>
+            <label>Description</label><br />
+            <textarea asp-for="Recipe.Description"></textarea>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Media</legend>
+
+        <div>
+            <label>Image URL</label><br />
+            <input asp-for="Recipe.ImageUrl" placeholder="https://example.com/image.jpg" />
+        </div>
+
+        <div>
+            <label>Video URL</label><br />
+            <input asp-for="Recipe.VideoUrl" placeholder="https://youtube.com/..." />
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Cooking Details</legend>
+
+        <div>
+            <label>Serving Size</label><br />
+            <input asp-for="Recipe.ServingSize" type="number" min="1" />
+        </div>
+
+        <div>
+            <label>Cook Time (minutes)</label><br />
+            <input asp-for="Recipe.CookTimeMinutes" type="number" min="1" />
+        </div>
+
+        <div>
+            <label>Difficulty</label><br />
+            <select asp-for="Recipe.Difficulty">
+                <option value="">-- Select --</option>
+                <option>Easy</option>
+                <option>Medium</option>
+                <option>Hard</option>
+            </select>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Ingredients</legend>
+
+        @for (int i = 0; i < Model.Ingredients.Count; i++)
+        {
+            <div>
+                <select asp-for="Ingredients[i].IngredientId">
+                    @foreach (var ing in Model.AllIngredients)
+                    {
+                        <option value="@ing.IngredientId">@ing.Name (@ing.Unit)</option>
+                    }
+                </select>
+
+                <input asp-for="Ingredients[i].Quantity" placeholder="Quantity" />
+            </div>
+        }
+    </fieldset>
+
+    <fieldset>
+        <legend>Categories</legend>
+
+        @foreach (var cat in Model.AllCategories)
+        {
+            <label>
+                <input type="checkbox" name="SelectedCategoryIds" value="@cat.CategoryId" />
+                @cat.Name
+            </label>
+            <br />
+        }
+    </fieldset>
+
+    <br />
+    <button type="submit">Create Recipe</button>
+</form>
