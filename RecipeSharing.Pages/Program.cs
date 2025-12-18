@@ -4,6 +4,11 @@ using RecipeSharing.BLL.Interfaces;
 using RecipeSharing.BLL.Services;
 using RecipeSharing.DAL.Models;
 using RecipeSharing.DAL.Repositories;
+using RecipeSharing.BLL.Services;
+using RecipeSharing.BLL.Services.Interfaces;
+using RecipeSharing.DAL.Models;
+using RecipeSharing.DAL.Repositories;
+using RecipeSharing.DAL.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +35,10 @@ builder.Services.AddAuthorization(options =>
 {
     options.FallbackPolicy = options.DefaultPolicy;
 });
+
+builder.Services.AddScoped<IRecipeRepository, RecipeRepository>();
+builder.Services.AddScoped<IRecipeService, RecipeService>();
+builder.Services.AddScoped<IMealPlanRepository, MealPlanRepository>();
 
 var app = builder.Build();
 
